@@ -6,20 +6,24 @@ const parser = new Parser();
 let rawdata = fs.readFileSync('settings.json');
 const settings = JSON.parse(rawdata);
 
-
+/* FUNCTION DECLARATIONS */
 // Run the code above for each RSS site
-var cnt = 0;
-settings.rss_links.forEach(rss_link => {
-    (async () => {
+const rssLoader = function () {
+    // Clean card-wrapper
+    document.getElementById("card-wrapper").innerHTML = "";
 
-        let feed = await parser.parseURL(rss_link);
+    var cnt = 0;
+    settings.rss_links.forEach(rss_link => {
+        (async () => {
 
-        // Create a wrapper for each RSS site
-        document.getElementById("card-wrapper").insertAdjacentHTML('beforeend', `
+            let feed = await parser.parseURL(rss_link);
+
+            // Create a wrapper for each RSS site
+            document.getElementById("card-wrapper").insertAdjacentHTML('beforeend', `
             <div class="card m-4" id="rss-container">
                 <h5 class="card-header feed-card-title">${feed.title}
                     <div class="float-right">
-                        <i class="fas fa-caret-up"></i>
+                        <i class="fas fa-caret-up float-right"></i>
                     </div>
                 </h5>
                 <div class="card-body" id="feed-${cnt}">
@@ -27,18 +31,18 @@ settings.rss_links.forEach(rss_link => {
             </div>
         `);
 
-        // Each article in the RSS link
-        for (let i = 0; i < 5 && i < feed.items.length; i += 1) {
-            let item = feed.items[i];
-            var content = item.content;
+            // Each article in the RSS link
+            for (let i = 0; i < 5 && i < feed.items.length; i += 1) {
+                let item = feed.items[i];
+                var content = item.content;
 
-            // Manage content/description
-            if (item.content === undefined && item.description !== undefined) {
-                var content = item.description;
-            }
+                // Manage content/description
+                if (item.content === undefined && item.description !== undefined) {
+                    var content = item.description;
+                }
 
-            // Create a card for each article
-            document.getElementById(`feed-${cnt}`).insertAdjacentHTML('beforeend', `
+                // Create a card for each article
+                document.getElementById(`feed-${cnt}`).insertAdjacentHTML('beforeend', `
                 <div class="card mb-2">
                     <div class="card-body" id="feed-${cnt}">
                         <a href="${item.link}" target="_blank">${item.title.capitalize()}</a>
@@ -47,14 +51,15 @@ settings.rss_links.forEach(rss_link => {
                     </div>
                 </div>
             `);
-        };
-        cnt += 1;
+            };
+            cnt += 1;
 
-        // Add img-fluid class to images
-        addResponsivenessToImages();
+            // Add img-fluid class to images
+            addResponsivenessToImages();
 
-    })()
-});
+        })()
+    });
+}
 
 // Add Bootstrap responsive image class to every img
 const addResponsivenessToImages = function () {
@@ -69,24 +74,47 @@ String.prototype.capitalize = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
+
+/* USAGE OF FUNCTIONS */
+// Load RSS links as cards
+rssLoader();
+
+
+/* LISTENERS */
 // Add listeners to enable card title show hide body
 document.addEventListener('click', function (event) {
+
+    // check to enable click also on arrow icon
+    let buffer = undefined;
     if (event.target.classList.contains("feed-card-title")) {
-        let body = event.target.parentElement.querySelector(".card-body");
+        buffer = event.target;
+    }
+    else if (event.target.parentNode && event.target.parentNode.classList.contains("feed-card-title")) {
+        buffer = event.target.parentNode;
+    }
+    else if (event.target.parentNode && event.target.parentNode.parentNode && event.target.parentNode.parentNode.classList.contains("feed-card-title")) {
+        buffer = event.target.parentNode.parentNode;
+    }
+
+    // show/hide management
+    if (buffer !== undefined) {
+        let body = buffer.parentElement.querySelector(".card-body");
         if (body.style.display === "none") {
             body.style.display = "block";
             // Change arrow icon
-            event.target.querySelector("i").className = "fas fa-caret-up";
+            buffer.querySelector("i").className = "fas fa-caret-up";
         } else {
             body.style.display = "none";
             // Change arrow icon
-            event.target.querySelector("i").className = "fas fa-caret-down";
+            buffer.querySelector("i").className = "fas fa-caret-down";
         }
     }
 });
 
+document.getElementById("home-btn-refresh").addEventListener("click", rssLoader);
 
-document.getElementById("btn-settings").addEventListener("click", function () {
+// Open the settings page
+document.getElementById("home-btn-settings").addEventListener("click", function () {
     nw.Window.open("settings.html", {
         position: 'center',
         width: 480,
