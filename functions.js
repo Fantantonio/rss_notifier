@@ -74,6 +74,14 @@ String.prototype.capitalize = function () {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
+// Return the parent element if it has the class provided
+function hasSomeParentTheClass(element, classname) {
+    if (element.className && element.className.split(' ').indexOf(classname) >= 0) {
+        return element;
+    }
+    return element.parentNode && hasSomeParentTheClass(element.parentNode, classname);
+}
+
 
 /* USAGE OF FUNCTIONS */
 // Load RSS links as cards
@@ -86,18 +94,10 @@ document.addEventListener('click', function (event) {
 
     // check to enable click also on arrow icon
     let buffer = undefined;
-    if (event.target.classList.contains("feed-card-title")) {
-        buffer = event.target;
-    }
-    else if (event.target.parentNode && event.target.parentNode.classList.contains("feed-card-title")) {
-        buffer = event.target.parentNode;
-    }
-    else if (event.target.parentNode && event.target.parentNode.parentNode && event.target.parentNode.parentNode.classList.contains("feed-card-title")) {
-        buffer = event.target.parentNode.parentNode;
-    }
+    buffer = hasSomeParentTheClass(event.target, "feed-card-title");
 
     // show/hide management
-    if (buffer !== undefined) {
+    if (buffer) {
         let body = buffer.parentElement.querySelector(".card-body");
         if (body.style.display === "none") {
             body.style.display = "block";
