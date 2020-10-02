@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Notifier - Settings</title>
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="style/style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <!--RSS Links-->
+            <div class="col-12 my-4">
+                <div class="jumbotron">
+                    <h1 class="display-4">Settings</h1>
+                    <p class="lead">Edit your RSS links</p>
+                    <hr class="my-4">
+                    <p>
+                        Separate every link by comma es:<br>
+                        <i>http://link1,https://link2,https://link3</i>
+                    </p>
+                </div>
+
+                <!--Textarea-->
+                <textarea id="settings-link-area" class="form-control" rows="8"></textarea>
+
+                <!--Buttons-->
+                <button id="settings-cancel-rss-links-edit" class="btn btn-outline-danger mt-2 float-left">
+                    <i class="fas fa-times-circle mr-1"></i>Cancel
+                </button>
+                <button id="settings-save-rss-links-edit" class="btn btn-outline-primary mt-2 float-right">
+                    <i class="fas fa-save mr-1"></i>Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- jQuery -->
+    <script src="node_modules/jquery/dist/jquery.slim.min.js"></script>
+    <!-- Popper.js -->
+    <script src="node_modules/popper.js/dist/umd/popper.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- My Js Scripts -->
+    <script src="settings.js"></script>
+</body>
+
+</html>
