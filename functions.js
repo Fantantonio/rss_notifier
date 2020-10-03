@@ -2,6 +2,7 @@ const fs = require('fs');
 const Parser = require('rss-parser');
 const parser = new Parser();
 
+
 // Get settings data from file
 let rawdata = fs.readFileSync('settings.json');
 const settings = JSON.parse(rawdata);
@@ -82,6 +83,33 @@ function hasSomeParentTheClass(element, classname) {
     return element.parentNode && hasSomeParentTheClass(element.parentNode, classname);
 }
 
+// Shows a notification
+function showNotification(text) {
+    const notification = new Notification("New articles", {
+        body: text,
+        icon: "asset/img/logo.png"
+    })
+    notification.onclick = function () {
+        window.focus();
+    };
+}
+
+// Check if is it possible to notify
+function notify(text) {
+    if (!("Notification" in window)) {
+        console.log("This browser does not support desktop notification");
+    }
+    else if (Notification.permission === "granted") {
+        showNotification(text);
+    } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                showNotification(text);
+            }
+        });
+    }
+}
+
 
 /* USAGE OF FUNCTIONS */
 // Load RSS links as cards
@@ -89,36 +117,43 @@ rssLoader();
 
 
 /* LISTENERS */
-// Add listeners to enable card title show hide body
-document.addEventListener('click', function (event) {
+document.addEventListener("DOMContentLoaded", function () {
 
-    // check to enable click also on arrow icon
-    let buffer = undefined;
-    buffer = hasSomeParentTheClass(event.target, "feed-card-title");
+    // Add listeners to enable card title show hide body
+    document.addEventListener('click', function (event) {
 
-    // show/hide management
-    if (buffer) {
-        let body = buffer.parentElement.querySelector(".card-body");
-        if (body.style.display === "none") {
-            body.style.display = "block";
-            // Change arrow icon
-            buffer.querySelector("i").className = "fas fa-caret-up";
-        } else {
-            body.style.display = "none";
-            // Change arrow icon
-            buffer.querySelector("i").className = "fas fa-caret-down";
+        // check to enable click also on arrow icon
+        let buffer = undefined;
+        buffer = hasSomeParentTheClass(event.target, "feed-card-title");
+
+        // show/hide management
+        if (buffer) {
+            let body = buffer.parentElement.querySelector(".card-body");
+            if (body.style.display === "none") {
+                body.style.display = "block";
+                // Change arrow icon
+                buffer.querySelector("i").className = "fas fa-caret-up";
+            } else {
+                body.style.display = "none";
+                // Change arrow icon
+                buffer.querySelector("i").className = "fas fa-caret-down";
+            }
         }
-    }
-});
-
-document.getElementById("home-btn-refresh").addEventListener("click", rssLoader);
-
-// Open the settings page
-document.getElementById("home-btn-settings").addEventListener("click", function () {
-    nw.Window.open("settings.html", {
-        position: 'center',
-        width: 480,
-        height: 640
     });
-});
 
+    document.getElementById("home-btn-refresh").addEventListener("click", rssLoader);
+
+    // Open the settings page
+    document.getElementById("home-btn-settings").addEventListener("click", function () {
+        nw.Window.open("settings.html", {
+            position: 'center',
+            width: 480,
+            height: 640
+        });
+    });
+
+    setInterval(function () {
+        rssLoader(); //todo: show an alert
+        notify("New articles found");
+    }, 600000); // Every 10 minutes
+});
