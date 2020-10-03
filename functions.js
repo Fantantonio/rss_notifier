@@ -1,13 +1,17 @@
 const fs = require('fs');
 const Parser = require('rss-parser');
 const parser = new Parser();
+const Datastore = require('nedb');
+const path = require('path');
+const db = new Datastore({ filename: 'asset/db/crono.db', autoload: true });
+//todo: new Datastore({ filename: path.join(require('nw.gui').App.dataPath, 'crono.db') });
 
 
 // Get settings data from file
-let rawdata = fs.readFileSync('settings.json');
-const settings = JSON.parse(rawdata);
+let settings_rawdata = fs.readFileSync('settings.json');
+const settings = JSON.parse(settings_rawdata);
 
-/* FUNCTION DECLARATIONS */
+/* ----------------------------FUNCTION DECLARATIONS */
 // Run the code above for each RSS site
 const rssLoader = function () {
     // Clean card-wrapper
@@ -35,9 +39,13 @@ const rssLoader = function () {
             // Each article in the RSS link
             for (let i = 0; i < 5 && i < feed.items.length; i += 1) {
                 let item = feed.items[i];
-                var content = item.content;
+
+                // DB check
+                let link_to_check = { link: item.link }
+                dbLinkManager(link_to_check);
 
                 // Manage content/description
+                var content = item.content;
                 if (item.content === undefined && item.description !== undefined) {
                     var content = item.description;
                 }
@@ -110,6 +118,42 @@ function notify(text) {
     }
 }
 
+// Print alert from message and type as input
+const printAlert = function (type, strong, message) {
+    let alert = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <strong>${strong}</strong> ${message}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            `;
+    document.getElementById("alert-wrapper").innerHTML = alert;
+}
+
+// Manage db querys
+const dbLinkManager = function (url) {
+    db.find({ link: url }, function (err, docs) {
+        // Query error
+        if (err) {
+            printAlert("danger", "Error: ", "failed to get data from database");
+        }
+        // Nothing found means it's a new article
+        else if (docs.length === 0) {
+            let new_link = url;
+            db.insert(new_link, function (err) {
+                // Query error
+                if (err) {
+                    printAlert("danger", "Error: ", "failed to insert data into the database");
+                }
+                else {
+                    notify("New article found");
+                }
+            });
+        }
+    });
+}
+
 
 /* USAGE OF FUNCTIONS */
 // Load RSS links as cards
@@ -154,6 +198,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setInterval(function () {
         rssLoader(); //todo: show an alert
-        notify("New articles found");
     }, 600000); // Every 10 minutes
 });
+
+
