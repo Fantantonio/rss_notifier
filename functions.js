@@ -7,17 +7,21 @@ const db = new Datastore({ filename: 'asset/db/crono.db', autoload: true });
 //todo: new Datastore({ filename: path.join(require('nw.gui').App.dataPath, 'crono.db') });
 
 
-// Get settings data from file
-let settings_rawdata = fs.readFileSync('settings.json');
-const settings = JSON.parse(settings_rawdata);
-
 /* ----------------------------FUNCTION DECLARATIONS */
+// Get settings data from file
+const getSettings = function () {
+    let settings_rawdata = fs.readFileSync('settings.json');
+    let settings = JSON.parse(settings_rawdata);
+    return settings;
+}
+
 // Run the code above for each RSS site
 const rssLoader = function () {
     // Clean card-wrapper
     document.getElementById("card-wrapper").innerHTML = "";
 
     var cnt = 0;
+    let settings = getSettings();
     settings.rss_links.forEach(rss_link => {
         (async () => {
 
@@ -25,7 +29,7 @@ const rssLoader = function () {
 
             // Create a wrapper for each RSS site
             document.getElementById("card-wrapper").insertAdjacentHTML('beforeend', `
-            <div class="card m-4" id="rss-container">
+            <div class="card m-4">
                 <h5 class="card-header feed-card-title">${feed.title}
                     <div class="float-right">
                         <i class="fas fa-caret-up float-right"></i>
@@ -41,7 +45,7 @@ const rssLoader = function () {
                 let item = feed.items[i];
 
                 // DB check
-                dbLinkManager(item.link);
+                dbLinkManager(item.title, item.link);
 
                 // Manage content/description
                 var content = item.content;
@@ -92,7 +96,7 @@ function hasSomeParentTheClass(element, classname) {
 
 // Shows a notification
 function showNotification(text) {
-    const notification = new Notification("New articles", {
+    const notification = new Notification("", {
         body: text,
         icon: "asset/img/logo.png"
     })
@@ -131,7 +135,7 @@ const printAlert = function (type, strong, message) {
 }
 
 // Manage db querys
-const dbLinkManager = function (url) {
+const dbLinkManager = function (title, url) {
     db.find({ link: url }, function (err, docs) {
         // Query error
         if (err) {
@@ -146,7 +150,7 @@ const dbLinkManager = function (url) {
                     printAlert("danger", "Error: ", "failed to insert data into the database");
                 }
                 else {
-                    notify("New article found");
+                    notify(title);
                 }
             });
         }
@@ -184,6 +188,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Refresh page on click
     document.getElementById("home-btn-refresh").addEventListener("click", rssLoader);
 
     // Open the settings page
@@ -195,7 +200,25 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Scroll to top
+    document.getElementById("scroll").addEventListener("click", function () {
+        window.scroll({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
+    });
+    window.addEventListener("scroll", function () {
+        if (window.scrollY >= 200) {
+            document.getElementById("scroll").style.display = "block";
+        }
+        else {
+            document.getElementById("scroll").style.display = "none";
+        }
+    })
+
+    // Every 10 minutes
     setInterval(function () {
         rssLoader();
-    }, 600000); // Every 10 minutes
+    }, 600000);
 });

@@ -28,7 +28,7 @@ $theme-colors: (
 @import "../../node_modules/bootstrap/scss/bootstrap";
 
 
-
+/* HOME */
 .nav-btn {
     &:hover {
         color: $dark;
@@ -47,4 +47,21 @@ $theme-colors: (
 #alert-wrapper {
     position: absolute;
     z-index: 1000;
+}
+
+#scroll {
+    position: fixed;
+    z-index: 1010;
+    right: 10px;
+    bottom: 10px;
+    border-radius: 50%;
+    border: none;
+    width: 50px;
+    height: 50px;
+    background-color: $purple;
+    box-shadow: 0 0 10px rgba(0,0,0, 0.25);
+    color: white;
+    outline: none;
+    cursor: pointer;
+    display: none;
 }
