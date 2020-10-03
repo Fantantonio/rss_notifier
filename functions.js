@@ -41,8 +41,7 @@ const rssLoader = function () {
                 let item = feed.items[i];
 
                 // DB check
-                let link_to_check = { link: item.link }
-                dbLinkManager(link_to_check);
+                dbLinkManager(item.link);
 
                 // Manage content/description
                 var content = item.content;
@@ -121,7 +120,7 @@ function notify(text) {
 // Print alert from message and type as input
 const printAlert = function (type, strong, message) {
     let alert = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <div class="alert alert-${type} alert-dismissible shadow fade show" role="alert">
             <strong>${strong}</strong> ${message}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
@@ -140,7 +139,7 @@ const dbLinkManager = function (url) {
         }
         // Nothing found means it's a new article
         else if (docs.length === 0) {
-            let new_link = url;
+            let new_link = { link: url };
             db.insert(new_link, function (err) {
                 // Query error
                 if (err) {
@@ -197,8 +196,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     setInterval(function () {
-        rssLoader(); //todo: show an alert
+        rssLoader();
     }, 600000); // Every 10 minutes
 });
-
-

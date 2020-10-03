@@ -25,7 +25,7 @@ $theme-colors: (
 
 
 /* BOOTSTRAP */
-@import "../node_modules/bootstrap/scss/bootstrap";
+@import "../../node_modules/bootstrap/scss/bootstrap";
 
 
 
@@ -42,4 +42,9 @@ $theme-colors: (
     &:hover {
         cursor: pointer;
     }
+}
+
+#alert-wrapper {
+    position: absolute;
+    z-index: 1000;
 }
